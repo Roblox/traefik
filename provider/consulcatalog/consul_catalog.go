@@ -37,6 +37,7 @@ type Provider struct {
 	StrictChecks          bool             `description:"Keep a Consul node only if all checks status are passing" export:"true"`
 	FrontEndRule          string           `description:"Frontend rule used for Consul services" export:"true"`
 	Filter                string           `description:"Filter to pass to Consul servers" export:"true"`
+	FilterCatalogByTag    string           `description:"Tag to filter the Consul catalog by" export:"true"`
 	TLS                   *types.ClientTLS `description:"Enable TLS support" export:"true"`
 	client                *api.Client
 	frontEndRuleTemplate  *template.Template
@@ -218,6 +219,10 @@ func (p *Provider) watchCatalogServices(stopCh <-chan struct{}, watchCh chan<- m
 				log.Errorf("Failed to list services: %v", err)
 				notifyError(err)
 				return
+			}
+
+			if len(p.FilterCatalogByTag) != 0 {
+				filterServicesByTag(data, p.FilterCatalogByTag)
 			}
 
 			if options.WaitIndex == meta.LastIndex {
@@ -626,4 +631,19 @@ func getSegments(path string, prefix string, tree map[string]string) []*frontend
 	}
 
 	return segments
+}
+
+func filterServicesByTag(services map[string][]string, filterTag string) {
+	for service, tags := range services {
+		filterTagExists := false
+		for _, tag := range tags {
+			if strings.Compare(tag, filterTag) == 0 {
+				filterTagExists = true
+				break
+			}
+		}
+		if !filterTagExists {
+			delete(services, service)
+		}
+	}
 }
