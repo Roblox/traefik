@@ -38,6 +38,7 @@ type Provider struct {
 	FrontEndRule          string           `description:"Frontend rule used for Consul services" export:"true"`
 	Filter                string           `description:"Filter to pass to Consul servers" export:"true"`
 	FilterCatalogByTag    string           `description:"Tag to filter the Consul catalog by" export:"true"`
+	RefreshInterval       int              `description:"Minimum interval between Catalog checks in seconds" export:"true"`
 	TLS                   *types.ClientTLS `description:"Enable TLS support" export:"true"`
 	client                *api.Client
 	frontEndRuleTemplate  *template.Template
@@ -267,6 +268,7 @@ func (p *Provider) watchCatalogServices(stopCh <-chan struct{}, watchCh chan<- m
 				if hasChanged(current, flashback) {
 					watchCh <- data
 					flashback = current
+					time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
 				}
 			}
 		}
@@ -330,11 +332,15 @@ func (p *Provider) watchHealthState(stopCh <-chan struct{}, watchCh chan<- map[s
 			options.WaitIndex = meta.LastIndex
 
 			// The response should be unified with watchCatalogServices
-			data, _, err := catalog.Services(&api.QueryOptions{AllowStale: p.Stale, Filter: p.Filter})
+			data, _, err := catalog.Services(&api.QueryOptions{AllowStale: p.Stale})
 			if err != nil {
 				log.Errorf("Failed to list services: %v", err)
 				notifyError(err)
 				return
+			}
+
+			if len(p.FilterCatalogByTag) != 0 {
+				filterServicesByTag(data, p.FilterCatalogByTag)
 			}
 
 			if data != nil {
@@ -352,6 +358,7 @@ func (p *Provider) watchHealthState(stopCh <-chan struct{}, watchCh chan<- map[s
 					watchCh <- data
 					flashback = current
 					flashbackMaintenance = maintenance
+					time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
 				} else {
 					addedKeysMaintenance, removedMaintenance := getChangedStringKeys(maintenance, flashbackMaintenance)
 
@@ -360,6 +367,7 @@ func (p *Provider) watchHealthState(stopCh <-chan struct{}, watchCh chan<- map[s
 						watchCh <- data
 						flashback = current
 						flashbackMaintenance = maintenance
+						time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
 					}
 				}
 			}
