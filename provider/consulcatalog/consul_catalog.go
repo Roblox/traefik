@@ -35,6 +35,7 @@ type Provider struct {
 	ExposedByDefault      bool             `description:"Expose Consul services by default" export:"true"`
 	Prefix                string           `description:"Prefix used for Consul catalog tags" export:"true"`
 	StrictChecks          bool             `description:"Keep a Consul node only if all checks status are passing" export:"true"`
+	AllStatuses           bool             `description:"Allow all status checks, even if failing" export:"true"`
 	FrontEndRule          string           `description:"Frontend rule used for Consul services" export:"true"`
 	Filter                string           `description:"Filter to pass to Consul servers" export:"true"`
 	FilterCatalogByTag    string           `description:"Tag to filter the Consul catalog by" export:"true"`
@@ -311,6 +312,8 @@ func (p *Provider) watchHealthState(stopCh <-chan struct{}, watchCh chan<- map[s
 					if healthy.Status == "passing" && !failing {
 						current[key] = append(current[key], healthy.Node)
 					} else if !p.StrictChecks && healthy.Status == "warning" && !failing {
+						current[key] = append(current[key], healthy.Node)
+					} else if p.AllStatuses {
 						current[key] = append(current[key], healthy.Node)
 					} else if strings.HasPrefix(healthy.CheckID, "_service_maintenance") || strings.HasPrefix(healthy.CheckID, "_node_maintenance") {
 						maintenance = append(maintenance, healthy.CheckID)
