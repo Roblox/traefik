@@ -309,11 +309,11 @@ func (p *Provider) watchHealthState(stopCh <-chan struct{}, watchCh chan<- map[s
 				for _, healthy := range healthyState {
 					key := fmt.Sprintf("%s-%s", healthy.Node, healthy.ServiceID)
 					_, failing := currentFailing[key]
-					if healthy.Status == "passing" && !failing {
+					if p.AllStatuses {
+						current[key] = append(current[key], healthy.Node)
+					} else if healthy.Status == "passing" && !failing {
 						current[key] = append(current[key], healthy.Node)
 					} else if !p.StrictChecks && healthy.Status == "warning" && !failing {
-						current[key] = append(current[key], healthy.Node)
-					} else if p.AllStatuses {
 						current[key] = append(current[key], healthy.Node)
 					} else if strings.HasPrefix(healthy.CheckID, "_service_maintenance") || strings.HasPrefix(healthy.CheckID, "_node_maintenance") {
 						maintenance = append(maintenance, healthy.CheckID)
@@ -591,7 +591,7 @@ func (p *Provider) getConstraintTags(tags []string) []string {
 
 func (p *Provider) hasPassingChecks(node *api.ServiceEntry) bool {
 	status := node.Checks.AggregatedStatus()
-	return status == "passing" || !p.StrictChecks && status == "warning"
+	return status == "passing" || !p.StrictChecks && status == "warning" || p.AllStatuses
 }
 
 func (p *Provider) generateFrontends(service *serviceUpdate) []*serviceUpdate {
