@@ -591,6 +591,14 @@ func (p *Provider) getConstraintTags(tags []string) []string {
 
 func (p *Provider) hasPassingChecks(node *api.ServiceEntry) bool {
 	status := node.Checks.AggregatedStatus()
+	// We need to look for one specific situation.
+	// If serfHealth is failing, the entire node is probably offline and we should always filter it.
+	for _, c := range node.Checks {
+		if c.CheckID == "serfHealth" && c.Status != "passing" {
+			return false
+		}
+	}
+	// When AllStatuses is true, beyond the above comment, always accept a node.
 	return status == "passing" || !p.StrictChecks && status == "warning" || p.AllStatuses
 }
 
