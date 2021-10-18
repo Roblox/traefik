@@ -32,6 +32,10 @@ type Provider struct {
 	Endpoint              string           `description:"Consul server endpoint"`
 	Domain                string           `description:"Default domain used"`
 	Stale                 bool             `description:"Use stale consistency for catalog reads" export:"true"`
+	// Note: Cache is *only used for health*.  This is due to the Health APIs using background streaming and
+	//  not the normal cache refresh state.  This means super stale data is a lot harder to get and we
+	//  don't have to worry about race conditions.
+	Cache                 bool             `description:"Use cache for health reads" export:"true"`
 	ExposedByDefault      bool             `description:"Expose Consul services by default" export:"true"`
 	Prefix                string           `description:"Prefix used for Consul catalog tags" export:"true"`
 	StrictChecks          bool             `description:"Keep a Consul node only if all checks status are passing" export:"true"`
@@ -269,8 +273,9 @@ func (p *Provider) watchCatalogServices(stopCh <-chan struct{}, watchCh chan<- m
 				if hasChanged(current, flashback) {
 					watchCh <- data
 					flashback = current
-					time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
 				}
+                                // Always sleep if this part is reached.
+				time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
 			}
 		}
 	})
@@ -361,7 +366,6 @@ func (p *Provider) watchHealthState(stopCh <-chan struct{}, watchCh chan<- map[s
 					watchCh <- data
 					flashback = current
 					flashbackMaintenance = maintenance
-					time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
 				} else {
 					addedKeysMaintenance, removedMaintenance := getChangedStringKeys(maintenance, flashbackMaintenance)
 
@@ -370,9 +374,10 @@ func (p *Provider) watchHealthState(stopCh <-chan struct{}, watchCh chan<- map[s
 						watchCh <- data
 						flashback = current
 						flashbackMaintenance = maintenance
-						time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
 					}
 				}
+				// Always sleep if this part is reached.
+				time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
 			}
 		}
 	})
@@ -510,7 +515,7 @@ func getServiceAddresses(services []*api.CatalogService) []string {
 func (p *Provider) healthyNodes(service string) (catalogUpdate, error) {
 	health := p.client.Health()
 	// You can't filter with assigning passingOnly here, nodeFilter will do this later
-	data, _, err := health.Service(service, "", false, &api.QueryOptions{AllowStale: p.Stale})
+	data, _, err := health.Service(service, "", false, &api.QueryOptions{AllowStale: p.Stale, UseCache: p.Cache})
 	if err != nil {
 		log.WithError(err).Errorf("Failed to fetch details of %s", service)
 		return catalogUpdate{}, err
