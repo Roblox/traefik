@@ -1,7 +1,6 @@
 package consulcatalog
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -29,24 +28,24 @@ var _ provider.Provider = (*Provider)(nil)
 // Provider holds configurations of the Consul catalog provider.
 type Provider struct {
 	provider.BaseProvider `mapstructure:",squash" export:"true"`
-	Endpoint              string           `description:"Consul server endpoint"`
-	Domain                string           `description:"Default domain used"`
-	Stale                 bool             `description:"Use stale consistency for catalog reads" export:"true"`
+	Endpoint              string `description:"Consul server endpoint"`
+	Domain                string `description:"Default domain used"`
+	Stale                 bool   `description:"Use stale consistency for catalog reads" export:"true"`
 	// Note: Cache is *only used for health*.  This is due to the Health APIs using background streaming and
 	//  not the normal cache refresh state.  This means super stale data is a lot harder to get and we
 	//  don't have to worry about race conditions.
-	Cache                 bool             `description:"Use cache for health reads" export:"true"`
-	ExposedByDefault      bool             `description:"Expose Consul services by default" export:"true"`
-	Prefix                string           `description:"Prefix used for Consul catalog tags" export:"true"`
-	StrictChecks          bool             `description:"Keep a Consul node only if all checks status are passing" export:"true"`
-	AllStatuses           bool             `description:"Allow all status checks, even if failing" export:"true"`
-	FrontEndRule          string           `description:"Frontend rule used for Consul services" export:"true"`
-	Filter                string           `description:"Filter to pass to Consul servers" export:"true"`
-	FilterCatalogByTag    string           `description:"Tag to filter the Consul catalog by" export:"true"`
-	RefreshInterval       int              `description:"Minimum interval between Catalog checks in seconds" export:"true"`
-	TLS                   *types.ClientTLS `description:"Enable TLS support" export:"true"`
-	client                *api.Client
-	frontEndRuleTemplate  *template.Template
+	Cache                bool             `description:"Use cache for health reads" export:"true"`
+	ExposedByDefault     bool             `description:"Expose Consul services by default" export:"true"`
+	Prefix               string           `description:"Prefix used for Consul catalog tags" export:"true"`
+	StrictChecks         bool             `description:"Keep a Consul node only if all checks status are passing" export:"true"`
+	AllStatuses          bool             `description:"Allow all status checks, even if failing" export:"true"`
+	FrontEndRule         string           `description:"Frontend rule used for Consul services" export:"true"`
+	Filter               string           `description:"Filter to pass to Consul servers" export:"true"`
+	FilterCatalogByTag   string           `description:"Tag to filter the Consul catalog by" export:"true"`
+	RefreshInterval      int              `description:"Minimum interval between Catalog checks in seconds" export:"true"`
+	TLS                  *types.ClientTLS `description:"Enable TLS support" export:"true"`
+	client               *api.Client
+	frontEndRuleTemplate *template.Template
 }
 
 // Service represent a Consul service.
@@ -165,6 +164,7 @@ func (p *Provider) watch(configurationChan chan<- types.ConfigMessage, stop chan
 	stopCh := make(chan struct{})
 	watchCh := make(chan map[string][]string)
 	errorCh := make(chan error)
+	ticker := time.NewTicker(time.Duration(p.RefreshInterval) * time.Second)
 
 	var errorOnce sync.Once
 	notifyError := func(err error) {
@@ -173,23 +173,30 @@ func (p *Provider) watch(configurationChan chan<- types.ConfigMessage, stop chan
 		})
 	}
 
-	p.watchHealthState(stopCh, watchCh, notifyError)
-	p.watchCatalogServices(stopCh, watchCh, notifyError)
-
 	defer close(stopCh)
 	defer close(watchCh)
 
 	safe.Go(func() {
-		for index := range watchCh {
-			log.Debug("List of services changed")
-			nodes, err := p.getNodes(index)
-			if err != nil {
-				notifyError(err)
-			}
-			configuration := p.buildConfiguration(nodes)
-			configurationChan <- types.ConfigMessage{
-				ProviderName:  "consul_catalog",
-				Configuration: configuration,
+		for {
+			select {
+			case <-stop:
+				return
+			case <-ticker.C:
+				data, err := p.getCatalogServices(notifyError)
+				if err != nil {
+					notifyError(err)
+				}
+				log.Debug("List of services being updated")
+				nodes, err := p.getNodes(data)
+				if err != nil {
+					notifyError(err)
+				}
+				configuration := p.buildConfiguration(nodes)
+				configurationChan <- types.ConfigMessage{
+					ProviderName:  "consul_catalog",
+					Configuration: configuration,
+				}
+				log.Debug("List of services updated")
 			}
 		}
 	})
@@ -204,183 +211,20 @@ func (p *Provider) watch(configurationChan chan<- types.ConfigMessage, stop chan
 	}
 }
 
-func (p *Provider) watchCatalogServices(stopCh <-chan struct{}, watchCh chan<- map[string][]string, notifyError func(error)) {
+func (p *Provider) getCatalogServices(notifyError func(error)) (map[string][]string, error) {
 	catalog := p.client.Catalog()
+	options := &api.QueryOptions{AllowStale: p.Stale}
+	data, _, err := catalog.Services(options)
+	if err != nil {
+		log.Errorf("Failed to list services: %v", err)
+		notifyError(err)
+		return nil, err
+	}
 
-	safe.Go(func() {
-		// variable to hold previous state
-		var flashback map[string]Service
-
-		options := &api.QueryOptions{WaitTime: DefaultWatchWaitTime, AllowStale: p.Stale, Filter: p.Filter}
-
-		for {
-			select {
-			case <-stopCh:
-				return
-			default:
-			}
-
-			data, meta, err := catalog.Services(options)
-			if err != nil {
-				log.Errorf("Failed to list services: %v", err)
-				notifyError(err)
-				return
-			}
-
-			if len(p.FilterCatalogByTag) != 0 {
-				filterServicesByTag(data, p.FilterCatalogByTag)
-			}
-
-			if options.WaitIndex == meta.LastIndex {
-				continue
-			}
-
-			options.WaitIndex = meta.LastIndex
-
-			if data != nil {
-				current := make(map[string]Service)
-				for key, value := range data {
-					nodes, _, err := catalog.Service(key, "", &api.QueryOptions{AllowStale: p.Stale})
-					if err != nil {
-						log.Errorf("Failed to get detail of service %s: %v", key, err)
-						notifyError(err)
-						return
-					}
-
-					nodesID := getServiceIds(nodes)
-					ports := getServicePorts(nodes)
-					addresses := getServiceAddresses(nodes)
-
-					if service, ok := current[key]; ok {
-						service.Tags = value
-						service.Nodes = nodesID
-						service.Ports = ports
-					} else {
-						service := Service{
-							Name:      key,
-							Tags:      value,
-							Nodes:     nodesID,
-							Addresses: addresses,
-							Ports:     ports,
-						}
-						current[key] = service
-					}
-				}
-
-				// A critical note is that the return of a blocking request is no guarantee of a change.
-				// It is possible that there was an idempotent write that does not affect the result of the query.
-				// Thus it is required to do extra check for changes...
-				if hasChanged(current, flashback) {
-					watchCh <- data
-					flashback = current
-				}
-                                // Always sleep if this part is reached.
-				time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
-			}
-		}
-	})
-}
-
-func (p *Provider) watchHealthState(stopCh <-chan struct{}, watchCh chan<- map[string][]string, notifyError func(error)) {
-	health := p.client.Health()
-	catalog := p.client.Catalog()
-
-	safe.Go(func() {
-		// variable to hold previous state
-		var flashback map[string][]string
-		var flashbackMaintenance []string
-
-		options := &api.QueryOptions{WaitTime: DefaultWatchWaitTime, AllowStale: p.Stale, Filter: p.Filter}
-
-		for {
-			select {
-			case <-stopCh:
-				return
-			default:
-			}
-
-			// Listening to changes that leads to `passing` state or degrades from it.
-			healthyState, meta, err := health.State("any", options)
-			if err != nil {
-				log.WithError(err).Error("Failed to retrieve health checks")
-				notifyError(err)
-				return
-			}
-
-			var current = make(map[string][]string)
-			var currentFailing = make(map[string]*api.HealthCheck)
-			var maintenance []string
-			if healthyState != nil {
-				for _, healthy := range healthyState {
-					key := fmt.Sprintf("%s-%s", healthy.Node, healthy.ServiceID)
-					_, failing := currentFailing[key]
-					if p.AllStatuses {
-						current[key] = append(current[key], healthy.Node)
-					} else if healthy.Status == "passing" && !failing {
-						current[key] = append(current[key], healthy.Node)
-					} else if !p.StrictChecks && healthy.Status == "warning" && !failing {
-						current[key] = append(current[key], healthy.Node)
-					} else if strings.HasPrefix(healthy.CheckID, "_service_maintenance") || strings.HasPrefix(healthy.CheckID, "_node_maintenance") {
-						maintenance = append(maintenance, healthy.CheckID)
-					} else {
-						currentFailing[key] = healthy
-						if _, ok := current[key]; ok {
-							delete(current, key)
-						}
-					}
-				}
-			}
-
-			// If LastIndex didn't change then it means `Get` returned
-			// because of the WaitTime and the key didn't changed.
-			if options.WaitIndex == meta.LastIndex {
-				continue
-			}
-
-			options.WaitIndex = meta.LastIndex
-
-			// The response should be unified with watchCatalogServices
-			data, _, err := catalog.Services(&api.QueryOptions{AllowStale: p.Stale})
-			if err != nil {
-				log.Errorf("Failed to list services: %v", err)
-				notifyError(err)
-				return
-			}
-
-			if len(p.FilterCatalogByTag) != 0 {
-				filterServicesByTag(data, p.FilterCatalogByTag)
-			}
-
-			if data != nil {
-				// A critical note is that the return of a blocking request is no guarantee of a change.
-				// It is possible that there was an idempotent write that does not affect the result of the query.
-				// Thus it is required to do extra check for changes...
-				addedKeys, removedKeys, changedKeys := getChangedHealth(current, flashback)
-
-				if len(addedKeys) > 0 || len(removedKeys) > 0 || len(changedKeys) > 0 {
-					log.WithField("DiscoveredServices", addedKeys).
-						WithField("MissingServices", removedKeys).
-						WithField("ChangedServices", changedKeys).
-						Debug("Health State change detected.")
-
-					watchCh <- data
-					flashback = current
-					flashbackMaintenance = maintenance
-				} else {
-					addedKeysMaintenance, removedMaintenance := getChangedStringKeys(maintenance, flashbackMaintenance)
-
-					if len(addedKeysMaintenance) > 0 || len(removedMaintenance) > 0 {
-						log.WithField("MaintenanceMode", maintenance).Debug("Maintenance change detected.")
-						watchCh <- data
-						flashback = current
-						flashbackMaintenance = maintenance
-					}
-				}
-				// Always sleep if this part is reached.
-				time.Sleep(time.Duration(p.RefreshInterval) * time.Second)
-			}
-		}
-	})
+	if len(p.FilterCatalogByTag) != 0 {
+		filterServicesByTag(data, p.FilterCatalogByTag)
+	}
+	return data, nil
 }
 
 func (p *Provider) getNodes(index map[string][]string) ([]catalogUpdate, error) {
