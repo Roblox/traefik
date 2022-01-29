@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -51,7 +52,8 @@ type metricsMiddleware struct {
 }
 
 func (m *metricsMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	labels := []string{"method", getMethod(r), "protocol", getRequestProtocol(r)}
+	ipaddr, _, _ := net.SplitHostPort(r.RemoteAddr)
+	labels := []string{"method", getMethod(r), "protocol", getRequestProtocol(r), "client_ip", ipaddr}
 	labels = append(labels, m.baseLabels...)
 
 	openConns := atomic.AddInt64(&m.openConns, 1)
