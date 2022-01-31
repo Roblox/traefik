@@ -53,15 +53,17 @@ type metricsMiddleware struct {
 
 func (m *metricsMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	ipaddr, _, _ := net.SplitHostPort(r.RemoteAddr)
-	labels := []string{"method", getMethod(r), "protocol", getRequestProtocol(r), "client_ip", ipaddr}
+	labels := []string{"method", getMethod(r), "protocol", getRequestProtocol(r)}
 	labels = append(labels, m.baseLabels...)
+	connLabels := []string{"method", getMethod(r), "protocol", getRequestProtocol(r), "client_ip", ipaddr}
+	connLabels = append(connLabels, m.baseLabels...)
 
 	openConns := atomic.AddInt64(&m.openConns, 1)
-	m.openConnsGauge.With(labels...).Set(float64(openConns))
+	m.openConnsGauge.With(connLabels...).Set(float64(openConns))
 	defer func(labelValues []string) {
 		openConns := atomic.AddInt64(&m.openConns, -1)
 		m.openConnsGauge.With(labelValues...).Set(float64(openConns))
-	}(labels)
+	}(connLabels)
 
 	start := time.Now()
 	recorder := &responseRecorder{rw, http.StatusOK}

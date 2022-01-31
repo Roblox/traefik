@@ -116,7 +116,7 @@ func initStandardRegistry(config *types.Prometheus) Registry {
 	entrypointOpenConns := newGaugeFrom(promState.collectors, stdprometheus.GaugeOpts{
 		Name: entrypointOpenConnsName,
 		Help: "How many open connections exist on an entrypoint, partitioned by method and protocol.",
-	}, []string{"method", "protocol", "entrypoint"})
+	}, []string{"method", "protocol", "client_ip", "entrypoint"})
 
 	backendReqs := newCounterFrom(promState.collectors, stdprometheus.CounterOpts{
 		Name: backendReqsTotalName,
@@ -130,7 +130,7 @@ func initStandardRegistry(config *types.Prometheus) Registry {
 	backendOpenConns := newGaugeFrom(promState.collectors, stdprometheus.GaugeOpts{
 		Name: backendOpenConnsName,
 		Help: "How many open connections exist on a backend, partitioned by method and protocol.",
-	}, []string{"method", "protocol", "backend"})
+	}, []string{"method", "protocol", "client_ip", "backend"})
 	backendRetries := newCounterFrom(promState.collectors, stdprometheus.CounterOpts{
 		Name: backendRetriesTotalName,
 		Help: "How many request retries happened on a backend.",
