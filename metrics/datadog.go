@@ -24,6 +24,7 @@ const (
 	ddRetriesTotalName            = "backend.retries.total"
 	ddConfigReloadsName           = "config.reload.total"
 	ddConfigReloadsFailureTagName = "failure"
+	ddClientIpReqsName            = "clientip.request.total"
 	ddLastConfigReloadSuccessName = "config.reload.lastSuccessTimestamp"
 	ddLastConfigReloadFailureName = "config.reload.lastFailureTimestamp"
 	ddEntrypointReqsName          = "entrypoint.request.total"
@@ -43,6 +44,7 @@ func RegisterDatadog(config *types.Datadog) Registry {
 		enabled:                        true,
 		configReloadsCounter:           datadogClient.NewCounter(ddConfigReloadsName, 1.0),
 		configReloadsFailureCounter:    datadogClient.NewCounter(ddConfigReloadsName, 1.0).With(ddConfigReloadsFailureTagName, "true"),
+		clientIpReqsCounter:            datadogClient.NewCounter(ddClientIpReqsName, 1.0),
 		lastConfigReloadSuccessGauge:   datadogClient.NewGauge(ddLastConfigReloadSuccessName),
 		lastConfigReloadFailureGauge:   datadogClient.NewGauge(ddLastConfigReloadFailureName),
 		entrypointReqsCounter:          datadogClient.NewCounter(ddEntrypointReqsName, 1.0),

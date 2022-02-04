@@ -23,6 +23,7 @@ const (
 	statsdRetriesTotalName            = "backend.retries.total"
 	statsdConfigReloadsName           = "config.reload.total"
 	statsdConfigReloadsFailureName    = statsdConfigReloadsName + ".failure"
+	statsdClientIpReqsName            = "clientip.reqs.total"
 	statsdLastConfigReloadSuccessName = "config.reload.lastSuccessTimestamp"
 	statsdLastConfigReloadFailureName = "config.reload.lastFailureTimestamp"
 	statsdEntrypointReqsName          = "entrypoint.request.total"
@@ -44,6 +45,7 @@ func RegisterStatsd(config *types.Statsd) Registry {
 		configReloadsFailureCounter:    statsdClient.NewCounter(statsdConfigReloadsFailureName, 1.0),
 		lastConfigReloadSuccessGauge:   statsdClient.NewGauge(statsdLastConfigReloadSuccessName),
 		lastConfigReloadFailureGauge:   statsdClient.NewGauge(statsdLastConfigReloadFailureName),
+		clientIpReqsCounter:            statsdClient.NewCounter(statsdClientIpReqsName, 1.0),
 		entrypointReqsCounter:          statsdClient.NewCounter(statsdEntrypointReqsName, 1.0),
 		entrypointReqDurationHistogram: statsdClient.NewTiming(statsdEntrypointReqDurationName, 1.0),
 		entrypointOpenConnsGauge:       statsdClient.NewGauge(statsdEntrypointOpenConnsName),

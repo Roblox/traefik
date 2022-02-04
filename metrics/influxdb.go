@@ -30,6 +30,7 @@ const (
 	influxDBRetriesTotalName            = "traefik.backend.retries.total"
 	influxDBConfigReloadsName           = "traefik.config.reload.total"
 	influxDBConfigReloadsFailureName    = influxDBConfigReloadsName + ".failure"
+	influxDBClientReqsTotalName         = "traefik.clientip.requests.total"
 	influxDBLastConfigReloadSuccessName = "traefik.config.reload.lastSuccessTimestamp"
 	influxDBLastConfigReloadFailureName = "traefik.config.reload.lastFailureTimestamp"
 	influxDBEntrypointReqsName          = "traefik.entrypoint.requests.total"
@@ -54,6 +55,7 @@ func RegisterInfluxDB(config *types.InfluxDB) Registry {
 		configReloadsFailureCounter:    influxDBClient.NewCounter(influxDBConfigReloadsFailureName),
 		lastConfigReloadSuccessGauge:   influxDBClient.NewGauge(influxDBLastConfigReloadSuccessName),
 		lastConfigReloadFailureGauge:   influxDBClient.NewGauge(influxDBLastConfigReloadFailureName),
+		clientIpReqsCounter:            influxDBClient.NewCounter(influxDBClientReqsTotalName),
 		entrypointReqsCounter:          influxDBClient.NewCounter(influxDBEntrypointReqsName),
 		entrypointReqDurationHistogram: influxDBClient.NewHistogram(influxDBEntrypointReqDurationName),
 		entrypointOpenConnsGauge:       influxDBClient.NewGauge(influxDBEntrypointOpenConnsName),
