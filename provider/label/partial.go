@@ -385,17 +385,7 @@ func GetResponseForwarding(labels map[string]string) *types.ResponseForwarding {
 
 // GetBuffering Create buffering from labels
 func GetBuffering(labels map[string]string) *types.Buffering {
-	if !HasPrefix(labels, TraefikBackendBuffering) {
-		return nil
-	}
-
-	return &types.Buffering{
-		MaxRequestBodyBytes:  GetInt64Value(labels, TraefikBackendBufferingMaxRequestBodyBytes, 0),
-		MaxResponseBodyBytes: GetInt64Value(labels, TraefikBackendBufferingMaxResponseBodyBytes, 0),
-		MemRequestBodyBytes:  GetInt64Value(labels, TraefikBackendBufferingMemRequestBodyBytes, 0),
-		MemResponseBodyBytes: GetInt64Value(labels, TraefikBackendBufferingMemResponseBodyBytes, 0),
-		RetryExpression:      GetStringValue(labels, TraefikBackendBufferingRetryExpression, ""),
-	}
+	return nil
 }
 
 // GetCircuitBreaker Create circuit breaker from labels
