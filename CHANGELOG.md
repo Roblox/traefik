@@ -1,5 +1,29 @@
 # Change Log
 
+## [v1.7.34](https://github.com/traefik/traefik/tree/v1.7.34) (2021-12-10)
+[All Commits](https://github.com/traefik/traefik/compare/v1.7.33...v1.7.34)
+
+**Bug fixes:**
+- **[k8s]** require that secret is a valid PEM ([#8624](https://github.com/traefik/traefik/pull/8624) by [jr0d](https://github.com/jr0d))
+
+## [v1.7.33](https://github.com/traefik/traefik/tree/v1.7.33) (2021-10-07)
+[All Commits](https://github.com/traefik/traefik/compare/v1.7.32...v1.7.33)
+
+**Bug fixes:**
+- **[acme]** acme: fix non-cluster mode ([#8501](https://github.com/traefik/traefik/pull/8501) by [ldez](https://github.com/ldez))
+
+## [v1.7.32](https://github.com/traefik/traefik/tree/v1.7.32) (2021-10-06)
+[All Commits](https://github.com/traefik/traefik/compare/v1.7.31...v1.7.32)
+
+**Bug fixes:**
+- **[acme]** acme: add missing preferred chain ([#8495](https://github.com/traefik/traefik/pull/8495) by [ldez](https://github.com/ldez))
+
+## [v1.7.31](https://github.com/traefik/traefik/tree/v1.7.31) (2021-10-04)
+[All Commits](https://github.com/traefik/traefik/compare/v1.7.30...v1.7.31)
+
+**Bug fixes:**
+- **[acme,k8s]** acme: add support of preferredchain in Traefik v1 ([#8482](https://github.com/traefik/traefik/pull/8482) by [ldez](https://github.com/ldez))
+
 ## [v1.7.30](https://github.com/traefik/traefik/tree/v1.7.30) (2021-04-07)
 [All Commits](https://github.com/traefik/traefik/compare/v1.7.29...v1.7.30)
 

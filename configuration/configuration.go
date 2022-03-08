@@ -8,7 +8,7 @@ import (
 
 	"github.com/containous/flaeg"
 	servicefabric "github.com/containous/traefik-extra-service-fabric"
-	"github.com/go-acme/lego/v3/challenge/dns01"
+	"github.com/go-acme/lego/v4/challenge/dns01"
 	"github.com/traefik/traefik/acme"
 	"github.com/traefik/traefik/api"
 	"github.com/traefik/traefik/log"
@@ -452,18 +452,19 @@ func (gc *GlobalConfiguration) InitACMEProvider() (*acmeprovider.Provider, error
 		if gc.Cluster == nil {
 			provider := &acmeprovider.Provider{}
 			provider.Configuration = &acmeprovider.Configuration{
-				KeyType:       gc.ACME.KeyType,
-				OnHostRule:    gc.ACME.OnHostRule,
-				OnDemand:      gc.ACME.OnDemand,
-				Email:         gc.ACME.Email,
-				Storage:       gc.ACME.Storage,
-				HTTPChallenge: gc.ACME.HTTPChallenge,
-				DNSChallenge:  gc.ACME.DNSChallenge,
-				TLSChallenge:  gc.ACME.TLSChallenge,
-				Domains:       gc.ACME.Domains,
-				ACMELogging:   gc.ACME.ACMELogging,
-				CAServer:      gc.ACME.CAServer,
-				EntryPoint:    gc.ACME.EntryPoint,
+				KeyType:        gc.ACME.KeyType,
+				OnHostRule:     gc.ACME.OnHostRule,
+				OnDemand:       gc.ACME.OnDemand,
+				Email:          gc.ACME.Email,
+				PreferredChain: gc.ACME.PreferredChain,
+				Storage:        gc.ACME.Storage,
+				HTTPChallenge:  gc.ACME.HTTPChallenge,
+				DNSChallenge:   gc.ACME.DNSChallenge,
+				TLSChallenge:   gc.ACME.TLSChallenge,
+				Domains:        gc.ACME.Domains,
+				ACMELogging:    gc.ACME.ACMELogging,
+				CAServer:       gc.ACME.CAServer,
+				EntryPoint:     gc.ACME.EntryPoint,
 			}
 
 			store := acmeprovider.NewLocalStore(provider.Storage)
