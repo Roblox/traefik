@@ -26,7 +26,7 @@ const (
 	configReloadsFailuresTotalName = metricConfigPrefix + "reloads_failure_total"
 	configLastReloadSuccessName    = metricConfigPrefix + "last_reload_success"
 	configLastReloadFailureName    = metricConfigPrefix + "last_reload_failure"
-	clientIpReqsCounter            = metricConfigPrefix + "ip_requests"
+	clientIPReqsCounter            = metricConfigPrefix + "ip_requests"
 
 	// entrypoint
 	metricEntryPointPrefix    = MetricNamePrefix + "entrypoint_"
@@ -123,8 +123,8 @@ func initStandardRegistry(config *types.Prometheus) Registry {
 		Name: configLastReloadFailureName,
 		Help: "Last config reload failure",
 	}, []string{})
-	clientIpReqs := newCounterFrom(promState.collectors, stdprometheus.CounterOpts{
-		Name: clientIpReqsCounter,
+	clientIPReqs := newCounterFrom(promState.collectors, stdprometheus.CounterOpts{
+		Name: clientIPReqsCounter,
 		Help: "Requests by client ip",
 	}, []string{"client_ip"})
 
@@ -169,7 +169,7 @@ func initStandardRegistry(config *types.Prometheus) Registry {
 		configReloadsFailures.cv.Describe,
 		lastConfigReloadSuccess.gv.Describe,
 		lastConfigReloadFailure.gv.Describe,
-		clientIpReqs.cv.Describe,
+		clientIPReqs.cv.Describe,
 		entrypointReqs.cv.Describe,
 		entrypointReqDurations.hv.Describe,
 		entrypointOpenConns.gv.Describe,
@@ -186,7 +186,7 @@ func initStandardRegistry(config *types.Prometheus) Registry {
 		configReloadsFailureCounter:    configReloadsFailures,
 		lastConfigReloadSuccessGauge:   lastConfigReloadSuccess,
 		lastConfigReloadFailureGauge:   lastConfigReloadFailure,
-		clientIpReqsCounter:            clientIpReqs,
+		clientIPReqsCounter:            clientIPReqs,
 		entrypointReqsCounter:          entrypointReqs,
 		entrypointReqDurationHistogram: entrypointReqDurations,
 		entrypointOpenConnsGauge:       entrypointOpenConns,

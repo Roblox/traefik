@@ -119,7 +119,7 @@ func TestPrometheus(t *testing.T) {
 	prometheusRegistry.LastConfigReloadSuccessGauge().Set(float64(time.Now().Unix()))
 	prometheusRegistry.LastConfigReloadFailureGauge().Set(float64(time.Now().Unix()))
 	prometheusRegistry.
-		ClientIpReqsCounter().
+		ClientIPReqsCounter().
 		With("client_ip", "10.10.10.10").
 		Add(1)
 
@@ -186,7 +186,7 @@ func TestPrometheus(t *testing.T) {
 			name:   clientIpReqsTotalName,
 			labels: map[string]string{
 				"client_ip": "10.10.10.10",
-			}
+			},
 			assert: buildCounterAssert(t,clientIpReqsTotalName, 1),
 		},
 		{

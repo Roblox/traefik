@@ -15,7 +15,7 @@ type Registry interface {
 	ConfigReloadsFailureCounter() metrics.Counter
 	LastConfigReloadSuccessGauge() metrics.Gauge
 	LastConfigReloadFailureGauge() metrics.Gauge
-	ClientIpReqsCounter() metrics.Counter
+	ClientIPReqsCounter() metrics.Counter
 
 	// entry point metrics
 	EntrypointReqsCounter() metrics.Counter
@@ -44,7 +44,7 @@ func NewMultiRegistry(registries []Registry) Registry {
 	var configReloadsFailureCounter []metrics.Counter
 	var lastConfigReloadSuccessGauge []metrics.Gauge
 	var lastConfigReloadFailureGauge []metrics.Gauge
-	var clientIpReqsCounter []metrics.Counter
+	var clientIPReqsCounter []metrics.Counter
 	var entrypointReqsCounter []metrics.Counter
 	var entrypointReqDurationHistogram []metrics.Histogram
 	var entrypointOpenConnsGauge []metrics.Gauge
@@ -67,8 +67,8 @@ func NewMultiRegistry(registries []Registry) Registry {
 		if r.LastConfigReloadFailureGauge() != nil {
 			lastConfigReloadFailureGauge = append(lastConfigReloadFailureGauge, r.LastConfigReloadFailureGauge())
 		}
-		if r.ClientIpReqsCounter() != nil {
-			clientIpReqsCounter = append(clientIpReqsCounter, r.ClientIpReqsCounter())
+		if r.ClientIPReqsCounter() != nil {
+			clientIPReqsCounter = append(clientIPReqsCounter, r.ClientIPReqsCounter())
 		}
 		if r.EntrypointReqsCounter() != nil {
 			entrypointReqsCounter = append(entrypointReqsCounter, r.EntrypointReqsCounter())
@@ -102,7 +102,7 @@ func NewMultiRegistry(registries []Registry) Registry {
 		configReloadsFailureCounter:    multi.NewCounter(configReloadsFailureCounter...),
 		lastConfigReloadSuccessGauge:   multi.NewGauge(lastConfigReloadSuccessGauge...),
 		lastConfigReloadFailureGauge:   multi.NewGauge(lastConfigReloadFailureGauge...),
-		clientIpReqsCounter:            multi.NewCounter(clientIpReqsCounter...),
+		clientIPReqsCounter:            multi.NewCounter(clientIPReqsCounter...),
 		entrypointReqsCounter:          multi.NewCounter(entrypointReqsCounter...),
 		entrypointReqDurationHistogram: multi.NewHistogram(entrypointReqDurationHistogram...),
 		entrypointOpenConnsGauge:       multi.NewGauge(entrypointOpenConnsGauge...),
@@ -120,7 +120,7 @@ type standardRegistry struct {
 	configReloadsFailureCounter    metrics.Counter
 	lastConfigReloadSuccessGauge   metrics.Gauge
 	lastConfigReloadFailureGauge   metrics.Gauge
-	clientIpReqsCounter            metrics.Counter
+	clientIPReqsCounter            metrics.Counter
 	entrypointReqsCounter          metrics.Counter
 	entrypointReqDurationHistogram metrics.Histogram
 	entrypointOpenConnsGauge       metrics.Gauge
@@ -151,8 +151,8 @@ func (r *standardRegistry) LastConfigReloadFailureGauge() metrics.Gauge {
 	return r.lastConfigReloadFailureGauge
 }
 
-func (r *standardRegistry) ClientIpReqsCounter() metrics.Counter {
-	return r.clientIpReqsCounter
+func (r *standardRegistry) ClientIPReqsCounter() metrics.Counter {
+	return r.clientIPReqsCounter
 }
 
 func (r *standardRegistry) EntrypointReqsCounter() metrics.Counter {
