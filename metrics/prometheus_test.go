@@ -183,11 +183,11 @@ func TestPrometheus(t *testing.T) {
 			assert: buildTimestampAssert(t, configLastReloadFailureName),
 		},
 		{
-			name: clientIpReqsTotalName,
+			name: clientIPReqsCounterName,
 			labels: map[string]string{
 				"client_ip": "10.10.10.10",
 			},
-			assert: buildCounterAssert(t, clientIpReqsTotalName, 1),
+			assert: buildCounterAssert(t, clientIPReqsCounterName, 1),
 		},
 		{
 			name: entrypointReqsTotalName,
