@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,6 +27,7 @@ func NewEntryPointMetricsMiddleware(registry metrics.Registry, entryPointName st
 		reqsCounter:          registry.EntrypointReqsCounter(),
 		reqDurationHistogram: registry.EntrypointReqDurationHistogram(),
 		openConnsGauge:       registry.EntrypointOpenConnsGauge(),
+		clientIPCounter:      registry.ClientIPReqsCounter(),
 		baseLabels:           []string{"entrypoint", entryPointName},
 	}
 }
@@ -36,6 +38,7 @@ func NewBackendMetricsMiddleware(registry metrics.Registry, backendName string) 
 		reqsCounter:          registry.BackendReqsCounter(),
 		reqDurationHistogram: registry.BackendReqDurationHistogram(),
 		openConnsGauge:       registry.BackendOpenConnsGauge(),
+		clientIPCounter:      registry.ClientIPReqsCounter(),
 		baseLabels:           []string{"backend", backendName},
 	}
 }
@@ -47,10 +50,15 @@ type metricsMiddleware struct {
 	reqsCounter          gokitmetrics.Counter
 	reqDurationHistogram gokitmetrics.Histogram
 	openConnsGauge       gokitmetrics.Gauge
+	clientIPCounter      gokitmetrics.Counter
 	baseLabels           []string
 }
 
 func (m *metricsMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	ipaddr, _, _ := net.SplitHostPort(r.RemoteAddr)
+	clientIPLabels := []string{"client_ip", ipaddr}
+	m.clientIPCounter.With(clientIPLabels...).Add(1)
+
 	labels := []string{"method", getMethod(r), "protocol", getRequestProtocol(r)}
 	labels = append(labels, m.baseLabels...)
 

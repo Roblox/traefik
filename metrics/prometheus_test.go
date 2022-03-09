@@ -118,6 +118,10 @@ func TestPrometheus(t *testing.T) {
 	prometheusRegistry.ConfigReloadsFailureCounter().Add(1)
 	prometheusRegistry.LastConfigReloadSuccessGauge().Set(float64(time.Now().Unix()))
 	prometheusRegistry.LastConfigReloadFailureGauge().Set(float64(time.Now().Unix()))
+	prometheusRegistry.
+		ClientIPReqsCounter().
+		With("client_ip", "10.10.10.10").
+		Add(1)
 
 	prometheusRegistry.
 		EntrypointReqsCounter().
@@ -177,6 +181,13 @@ func TestPrometheus(t *testing.T) {
 		{
 			name:   configLastReloadFailureName,
 			assert: buildTimestampAssert(t, configLastReloadFailureName),
+		},
+		{
+			name: clientIPReqsCounterName,
+			labels: map[string]string{
+				"client_ip": "10.10.10.10",
+			},
+			assert: buildCounterAssert(t, clientIPReqsCounterName, 1),
 		},
 		{
 			name: entrypointReqsTotalName,
