@@ -22,6 +22,7 @@ require (
 	github.com/cenk/backoff v2.1.1+incompatible
 	github.com/codahale/hdrhistogram v0.9.0 // indirect
 	github.com/containous/flaeg v1.4.1
+	github.com/containous/mux v0.0.0-20181024131434-c33f32e26898
 	github.com/containous/mux v0.0.0-20220113180107-8ffa4f6d063c
 	github.com/containous/staert v3.1.2+incompatible
 	github.com/containous/traefik-extra-service-fabric v1.7.1-0.20210227093100-8dcd57b609a8
