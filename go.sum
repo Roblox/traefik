@@ -172,6 +172,8 @@ github.com/containous/mesos-dns v0.5.3-rc1.0.20160623212649-b47dc4c19f21 h1:3MGy
 github.com/containous/mesos-dns v0.5.3-rc1.0.20160623212649-b47dc4c19f21/go.mod h1:NoK9LZGn7B49a5/VglEq2Sb5TTkaJpn2QeJq2c8Xc9w=
 github.com/containous/mux v0.0.0-20181024131434-c33f32e26898 h1:1srn9voikJGofblBhWy3WuZWqo14Ou7NaswNG/I2yWc=
 github.com/containous/mux v0.0.0-20181024131434-c33f32e26898/go.mod h1:z8WW7n06n8/1xF9Jl9WmuDeZuHAhfL+bwarNjsciwwg=
+github.com/containous/mux v0.0.0-20220113180107-8ffa4f6d063c h1:g6JvgTtfpS6AfhRjY87NZ0g39CrNDbdm8R+1CD85Cfo=
+github.com/containous/mux v0.0.0-20220113180107-8ffa4f6d063c/go.mod h1:z8WW7n06n8/1xF9Jl9WmuDeZuHAhfL+bwarNjsciwwg=
 github.com/containous/staert v3.1.2+incompatible h1:jgi4ndHADhTJLgEDny3VRsAytMYKNeSUw8QRAxpLCn4=
 github.com/containous/staert v3.1.2+incompatible/go.mod h1:LtjlnVpIrL+koUgIAwMBPcH2071WmoS6bor2vDSAwVE=
 github.com/containous/traefik-extra-service-fabric v1.7.1-0.20210227093100-8dcd57b609a8 h1:RbkUzumMhjRUE19u1Dsxy9WmdL4eiCnEE6QQgZTNc60=
