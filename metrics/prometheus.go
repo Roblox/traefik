@@ -169,7 +169,7 @@ func initStandardRegistry(config *types.Prometheus) Registry {
 		configReloadsFailures.cv.Describe,
 		lastConfigReloadSuccess.gv.Describe,
 		lastConfigReloadFailure.gv.Describe,
-        clientIpReqs.cv.Describe,
+		clientIpReqs.cv.Describe,
 		entrypointReqs.cv.Describe,
 		entrypointReqDurations.hv.Describe,
 		entrypointOpenConns.gv.Describe,

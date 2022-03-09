@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-    "net"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
