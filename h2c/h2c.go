@@ -65,13 +65,13 @@ func (s Server) Serve(l net.Listener) error {
 				return
 			}
 			defer s.closeHijackedConnQuietly(conn)
-			h2cSrv := &http2.Server{}
+			h2cSrv := &http2.Server{MaxConcurrentStreams: 1000000}
 			h2cSrv.ServeConn(conn, &http2.ServeConnOpts{Handler: originalHandler})
 			return
 		}
 		if conn, err := h2cUpgrade(w, r, s.closeHijackedConnQuietly); err == nil {
 			defer s.closeHijackedConnQuietly(conn)
-			h2cSrv := &http2.Server{}
+			h2cSrv := &http2.Server{MaxConcurrentStreams: 1000000}
 			h2cSrv.ServeConn(conn, &http2.ServeConnOpts{Handler: originalHandler})
 			return
 		}
