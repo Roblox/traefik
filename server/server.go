@@ -16,7 +16,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"x/net/http2"
+	"golang.org/x/net/http2"
 
 	"github.com/armon/go-proxyproto"
 	"github.com/containous/mux"
