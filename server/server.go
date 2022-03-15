@@ -16,6 +16,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"x/net/http2"
 
 	"github.com/armon/go-proxyproto"
 	"github.com/containous/mux"
@@ -605,16 +606,22 @@ func (s *Server) prepareServer(entryPointName string, entryPoint *configuration.
 		}
 	}
 
+	srv := &http.Server{
+		Addr:         entryPoint.Address,
+		Handler:      internalMuxRouter,
+		TLSConfig:    tlsConfig,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+		IdleTimeout:  idleTimeout,
+		ErrorLog:     httpServerLogger,
+	}
+	err = http2.ConfigureServer(srv, http2.Server{MaxConcurrentStreams: 100000})
+	if err != nil {
+		return nil, nil, err
+	}
+
 	return &h2c.Server{
-			Server: &http.Server{
-				Addr:         entryPoint.Address,
-				Handler:      internalMuxRouter,
-				TLSConfig:    tlsConfig,
-				ReadTimeout:  readTimeout,
-				WriteTimeout: writeTimeout,
-				IdleTimeout:  idleTimeout,
-				ErrorLog:     httpServerLogger,
-			},
+			Server: srv,
 		},
 		listener,
 		nil
