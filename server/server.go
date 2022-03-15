@@ -617,7 +617,7 @@ func (s *Server) prepareServer(entryPointName string, entryPoint *configuration.
 	}
 	err = http2.ConfigureServer(srv, &http2.Server{MaxConcurrentStreams: 100000})
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("error modifying http2 server: %v", err)
 	}
 
 	return &h2c.Server{
