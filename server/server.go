@@ -615,7 +615,7 @@ func (s *Server) prepareServer(entryPointName string, entryPoint *configuration.
 		IdleTimeout:  idleTimeout,
 		ErrorLog:     httpServerLogger,
 	}
-	err = http2.ConfigureServer(srv, http2.Server{MaxConcurrentStreams: 100000})
+	err = http2.ConfigureServer(srv, &http2.Server{MaxConcurrentStreams: 100000})
 	if err != nil {
 		return nil, nil, err
 	}
