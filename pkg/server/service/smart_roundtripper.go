@@ -13,7 +13,7 @@ import (
 
 const (
 	BreadCrumbsEnabled          = true // TODO: modify configurations to support changing this value
-	ServiceDestinationUriHeader = "X-Roblox-Traefik-Dest"
+	ServiceDestinationUriHeader = "x-roblox-traefik-dest"
 )
 
 func newSmartRoundTripper(transport *http.Transport, forwardingTimeouts *dynamic.ForwardingTimeouts) (http.RoundTripper, error) {
