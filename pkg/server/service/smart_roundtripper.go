@@ -75,7 +75,7 @@ func (m *smartRoundTripper) RoundTrip(req *http.Request) (*http.Response, error)
 		return response, err
 	}
 
-	if m.emitBreadCrumbs {
+	if m.emitBreadCrumbs && (response.StatusCode < 200 || response.StatusCode >= 300) {
 		emitBreadCrumbs(req, response)
 	}
 	return response, err
