@@ -75,41 +75,42 @@ type GlobalConfiguration struct {
 	LogLevel                  string            `short:"l" description:"Log level" export:"true"`
 	EntryPoints               EntryPoints       `description:"Entrypoints definition using format: --entryPoints='Name:http Address::8000 Redirect.EntryPoint:https' --entryPoints='Name:https Address::4442 TLS:tests/traefik.crt,tests/traefik.key;prod/traefik.crt,prod/traefik.key'" export:"true"`
 	Cluster                   *types.Cluster
-	Constraints               types.Constraints       `description:"Filter services by constraint, matching with service tags" export:"true"`
-	ACME                      *acme.ACME              `description:"Enable ACME (Let's Encrypt): automatic SSL" export:"true"`
-	DefaultEntryPoints        DefaultEntryPoints      `description:"Entrypoints to be used by frontends that do not specify any entrypoint" export:"true"`
-	ProvidersThrottleDuration flaeg.Duration          `description:"Backends throttle duration: minimum duration between 2 events from providers before applying a new configuration. It avoids unnecessary reloads if multiples events are sent in a short amount of time." export:"true"`
-	MaxIdleConnsPerHost       int                     `description:"If non-zero, controls the maximum idle (keep-alive) to keep per-host.  If zero, DefaultMaxIdleConnsPerHost is used" export:"true"`
-	IdleTimeout               flaeg.Duration          `description:"(Deprecated) maximum amount of time an idle (keep-alive) connection will remain idle before closing itself." export:"true"` // Deprecated
-	InsecureSkipVerify        bool                    `description:"Disable SSL certificate verification" export:"true"`
-	RootCAs                   tls.FilesOrContents     `description:"Add cert file for self-signed certificate"`
-	Retry                     *Retry                  `description:"Enable retry sending request if network error" export:"true"`
-	HealthCheck               *HealthCheckConfig      `description:"Health check parameters" export:"true"`
-	RespondingTimeouts        *RespondingTimeouts     `description:"Timeouts for incoming requests to the Traefik instance" export:"true"`
-	ForwardingTimeouts        *ForwardingTimeouts     `description:"Timeouts for requests forwarded to the backend servers" export:"true"`
-	AllowMinWeightZero        bool                    `description:"Allow weight to take 0 as minimum real value." export:"true"`         // Deprecated
-	KeepTrailingSlash         bool                    `description:"Do not remove trailing slash." export:"true"`                         // Deprecated
-	Web                       *WebCompatibility       `description:"(Deprecated) Enable Web backend with default settings" export:"true"` // Deprecated
-	Docker                    *docker.Provider        `description:"Enable Docker backend with default settings" export:"true"`
-	File                      *file.Provider          `description:"Enable File backend with default settings" export:"true"`
-	Marathon                  *marathon.Provider      `description:"Enable Marathon backend with default settings" export:"true"`
-	Consul                    *consul.Provider        `description:"Enable Consul backend with default settings" export:"true"`
-	ConsulCatalog             *consulcatalog.Provider `description:"Enable Consul catalog backend with default settings" export:"true"`
-	Etcd                      *etcd.Provider          `description:"Enable Etcd backend with default settings" export:"true"`
-	Zookeeper                 *zk.Provider            `description:"Enable Zookeeper backend with default settings" export:"true"`
-	Boltdb                    *boltdb.Provider        `description:"Enable Boltdb backend with default settings" export:"true"`
-	Kubernetes                *kubernetes.Provider    `description:"Enable Kubernetes backend with default settings" export:"true"`
-	Mesos                     *mesos.Provider         `description:"Enable Mesos backend with default settings" export:"true"`
-	Eureka                    *eureka.Provider        `description:"Enable Eureka backend with default settings" export:"true"`
-	ECS                       *ecs.Provider           `description:"Enable ECS backend with default settings" export:"true"`
-	Rancher                   *rancher.Provider       `description:"Enable Rancher backend with default settings" export:"true"`
-	DynamoDB                  *dynamodb.Provider      `description:"Enable DynamoDB backend with default settings" export:"true"`
-	ServiceFabric             *servicefabric.Provider `description:"Enable Service Fabric backend with default settings" export:"true"`
-	Rest                      *rest.Provider          `description:"Enable Rest backend with default settings" export:"true"`
-	API                       *api.Handler            `description:"Enable api/dashboard" export:"true"`
-	Metrics                   *types.Metrics          `description:"Enable a metrics exporter" export:"true"`
-	Ping                      *ping.Handler           `description:"Enable ping" export:"true"`
-	HostResolver              *HostResolverConfig     `description:"Enable CNAME Flattening" export:"true"`
+	Constraints               types.Constraints        `description:"Filter services by constraint, matching with service tags" export:"true"`
+	ACME                      *acme.ACME               `description:"Enable ACME (Let's Encrypt): automatic SSL" export:"true"`
+	DefaultEntryPoints        DefaultEntryPoints       `description:"Entrypoints to be used by frontends that do not specify any entrypoint" export:"true"`
+	ProvidersThrottleDuration flaeg.Duration           `description:"Backends throttle duration: minimum duration between 2 events from providers before applying a new configuration. It avoids unnecessary reloads if multiples events are sent in a short amount of time." export:"true"`
+	MaxIdleConnsPerHost       int                      `description:"If non-zero, controls the maximum idle (keep-alive) to keep per-host.  If zero, DefaultMaxIdleConnsPerHost is used" export:"true"`
+	IdleTimeout               flaeg.Duration           `description:"(Deprecated) maximum amount of time an idle (keep-alive) connection will remain idle before closing itself." export:"true"` // Deprecated
+	InsecureSkipVerify        bool                     `description:"Disable SSL certificate verification" export:"true"`
+	RootCAs                   tls.FilesOrContents      `description:"Add cert file for self-signed certificate"`
+	Retry                     *Retry                   `description:"Enable retry sending request if network error" export:"true"`
+	HealthCheck               *HealthCheckConfig       `description:"Health check parameters" export:"true"`
+	RespondingTimeouts        *RespondingTimeouts      `description:"Timeouts for incoming requests to the Traefik instance" export:"true"`
+	ForwardingTimeouts        *ForwardingTimeouts      `description:"Timeouts for requests forwarded to the backend servers" export:"true"`
+	AllowMinWeightZero        bool                     `description:"Allow weight to take 0 as minimum real value." export:"true"`         // Deprecated
+	KeepTrailingSlash         bool                     `description:"Do not remove trailing slash." export:"true"`                         // Deprecated
+	Web                       *WebCompatibility        `description:"(Deprecated) Enable Web backend with default settings" export:"true"` // Deprecated
+	Docker                    *docker.Provider         `description:"Enable Docker backend with default settings" export:"true"`
+	File                      *file.Provider           `description:"Enable File backend with default settings" export:"true"`
+	Marathon                  *marathon.Provider       `description:"Enable Marathon backend with default settings" export:"true"`
+	Consul                    *consul.Provider         `description:"Enable Consul backend with default settings" export:"true"`
+	ConsulCatalog             *consulcatalog.Provider  `description:"Enable Consul catalog backend with default settings" export:"true"`
+	Etcd                      *etcd.Provider           `description:"Enable Etcd backend with default settings" export:"true"`
+	Zookeeper                 *zk.Provider             `description:"Enable Zookeeper backend with default settings" export:"true"`
+	Boltdb                    *boltdb.Provider         `description:"Enable Boltdb backend with default settings" export:"true"`
+	Kubernetes                *kubernetes.Provider     `description:"Enable Kubernetes backend with default settings" export:"true"`
+	Mesos                     *mesos.Provider          `description:"Enable Mesos backend with default settings" export:"true"`
+	Eureka                    *eureka.Provider         `description:"Enable Eureka backend with default settings" export:"true"`
+	ECS                       *ecs.Provider            `description:"Enable ECS backend with default settings" export:"true"`
+	Rancher                   *rancher.Provider        `description:"Enable Rancher backend with default settings" export:"true"`
+	DynamoDB                  *dynamodb.Provider       `description:"Enable DynamoDB backend with default settings" export:"true"`
+	ServiceFabric             *servicefabric.Provider  `description:"Enable Service Fabric backend with default settings" export:"true"`
+	Rest                      *rest.Provider           `description:"Enable Rest backend with default settings" export:"true"`
+	API                       *api.Handler             `description:"Enable api/dashboard" export:"true"`
+	Metrics                   *types.Metrics           `description:"Enable a metrics exporter" export:"true"`
+	Ping                      *ping.Handler            `description:"Enable ping" export:"true"`
+	HostResolver              *HostResolverConfig      `description:"Enable CNAME Flattening" export:"true"`
+	BreadCrumbs               *types.BreadCrumbsConfig `description:"Configure emitting of breadcrumbs" export:"true"`
 }
 
 // WebCompatibility is a configuration to handle compatibility with deprecated web provider options
