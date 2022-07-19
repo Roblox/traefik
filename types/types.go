@@ -653,9 +653,10 @@ type TLSCLientCertificateDNInfos struct {
 
 // BreadCrumbsConfig determines which type of requests should have bread crumbs emitted in the response
 type BreadCrumbsConfig struct {
-	Enabled1xx bool `json:"enabled1xx" description:"Enable emitting of breadcrumb headers on 1xx requests"`
-	Enabled2xx bool `json:"enabled2xx" description:"Enable emitting of breadcrumb headers on 2xx requests"`
-	Enabled3xx bool `json:"enabled3xx" description:"Enable emitting of breadcrumb headers on 3xx requests"`
-	Enabled4xx bool `json:"enabled4xx" description:"Enable emitting of breadcrumb headers on 4xx requests"`
-	Enabled5xx bool `json:"enabled5xx" description:"Enable emitting of breadcrumb headers on 5xx requests"`
+	ProxyIp    string `json:"proxyIp" description:"The ip of the proxy"`
+	Enabled1xx bool   `json:"enabled1xx" description:"Enable emitting of breadcrumb headers on 1xx requests"`
+	Enabled2xx bool   `json:"enabled2xx" description:"Enable emitting of breadcrumb headers on 2xx requests"`
+	Enabled3xx bool   `json:"enabled3xx" description:"Enable emitting of breadcrumb headers on 3xx requests"`
+	Enabled4xx bool   `json:"enabled4xx" description:"Enable emitting of breadcrumb headers on 4xx requests"`
+	Enabled5xx bool   `json:"enabled5xx" description:"Enable emitting of breadcrumb headers on 5xx requests"`
 }

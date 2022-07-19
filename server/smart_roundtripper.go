@@ -2,7 +2,9 @@ package server
 
 import (
 	"crypto/tls"
+	"net"
 	"net/http"
+	"sync"
 
 	"github.com/traefik/traefik/types"
 	"golang.org/x/net/http/httpguts"
@@ -10,7 +12,14 @@ import (
 )
 
 const (
+	ProxyIpHeader               = "x-roblox-traefik-src"
 	ServiceDestinationUriHeader = "x-roblox-traefik-dest"
+	HeaderDelimiter             = ";"
+)
+
+var (
+	LocalIp     = ""
+	LocalIpOnce = sync.Once{}
 )
 
 func newSmartRoundTripper(transport *http.Transport, config *types.BreadCrumbsConfig) (http.RoundTripper, error) {
@@ -60,7 +69,7 @@ func (m *smartRoundTripper) RoundTrip(req *http.Request) (*http.Response, error)
 			m.config.Enabled5xx,
 		} // pls golang compiler optimize this :pray:
 		if response.StatusCode >= 100 && response.StatusCode < 600 && enabledFlags[response.StatusCode/100] {
-			emitBreadCrumbs(req, response)
+			emitBreadCrumbs(req, response, m.config)
 		}
 	}
 
@@ -71,6 +80,39 @@ func (m *smartRoundTripper) GetTLSClientConfig() *tls.Config {
 	return m.http2.TLSClientConfig
 }
 
-func emitBreadCrumbs(req *http.Request, response *http.Response) {
-	response.Header.Add(ServiceDestinationUriHeader, req.URL.String())
+func emitBreadCrumbs(req *http.Request, response *http.Response, config *types.BreadCrumbsConfig) {
+	var proxyIp string
+	if config.ProxyIp == "" {
+		LocalIpOnce.Do(func() {
+			LocalIp = getLocalIP()
+		})
+		proxyIp = LocalIp
+	} else {
+		proxyIp = config.ProxyIp
+	}
+	appendToHeader(response, ProxyIpHeader, proxyIp)
+	appendToHeader(response, ServiceDestinationUriHeader, req.URL.String())
+}
+
+func appendToHeader(response *http.Response, headerKey, headerVal string) {
+	if oldValue := response.Header.Get(headerKey); oldValue != "" {
+		response.Header.Add(headerKey, oldValue+HeaderDelimiter+headerVal)
+	} else {
+		response.Header.Add(headerKey, headerVal)
+	}
+}
+
+func getLocalIP() string {
+	interfaceAddresses, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, interfaceAddress := range interfaceAddresses {
+		if ipnet, ok := interfaceAddress.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
 }
