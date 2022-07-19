@@ -12,14 +12,14 @@ import (
 )
 
 const (
-	ProxyIpHeader               = "x-roblox-traefik-src"
-	ServiceDestinationUriHeader = "x-roblox-traefik-dest"
-	HeaderDelimiter             = ";"
+	proxyIPHeader               = "x-roblox-traefik-src"
+	serviceDestinationURIHeader = "x-roblox-traefik-dest"
+	headerDelimiter             = ";"
 )
 
 var (
-	LocalIp     = ""
-	LocalIpOnce = sync.Once{}
+	localIP     = ""
+	localIPOnce = sync.Once{}
 )
 
 func newSmartRoundTripper(transport *http.Transport, config *types.BreadCrumbsConfig) (http.RoundTripper, error) {
@@ -81,22 +81,22 @@ func (m *smartRoundTripper) GetTLSClientConfig() *tls.Config {
 }
 
 func emitBreadCrumbs(req *http.Request, response *http.Response, config *types.BreadCrumbsConfig) {
-	var proxyIp string
-	if config.ProxyIp == "" {
-		LocalIpOnce.Do(func() {
-			LocalIp = getLocalIP()
+	var proxyIP string
+	if config.ProxyIP == "" {
+		localIPOnce.Do(func() {
+			localIP = getLocalIP()
 		})
-		proxyIp = LocalIp
+		proxyIP = localIP
 	} else {
-		proxyIp = config.ProxyIp
+		proxyIP = config.ProxyIP
 	}
-	appendToHeader(response, ProxyIpHeader, proxyIp)
-	appendToHeader(response, ServiceDestinationUriHeader, req.URL.String())
+	appendToHeader(response, proxyIPHeader, proxyIP)
+	appendToHeader(response, serviceDestinationURIHeader, req.URL.String())
 }
 
 func appendToHeader(response *http.Response, headerKey, headerVal string) {
 	if oldValue := response.Header.Get(headerKey); oldValue != "" {
-		response.Header.Add(headerKey, oldValue+HeaderDelimiter+headerVal)
+		response.Header.Add(headerKey, oldValue+headerDelimiter+headerVal)
 	} else {
 		response.Header.Add(headerKey, headerVal)
 	}
