@@ -227,7 +227,7 @@ func (s *Server) configureLBServers(lb healthcheck.BalancerHandler, backend *typ
 
 // getRoundTripper will either use server.defaultForwardingRoundTripper or create a new one
 // given a custom TLS configuration is passed and the passTLSCert option is set to true.
-func (s *Server) getRoundTripper(entryPointName string, passTLSCert bool, tls *traefiktls.TLS) (http.RoundTripper, error) {
+func (s *Server) getRoundTripper(entryPointName string, passTLSCert bool, tls *traefiktls.TLS, breadCrumbsConfig *types.BreadCrumbsConfig) (http.RoundTripper, error) {
 	if !passTLSCert {
 		return s.defaultForwardingRoundTripper, nil
 	}
@@ -245,7 +245,7 @@ func (s *Server) getRoundTripper(entryPointName string, passTLSCert bool, tls *t
 
 	transport.TLSClientConfig = tlsConfig
 
-	smartTransport, err := newSmartRoundTripper(transport)
+	smartTransport, err := newSmartRoundTripper(transport, breadCrumbsConfig)
 	if err != nil {
 		return nil, err
 	}

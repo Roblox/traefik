@@ -87,7 +87,7 @@ func (s *Server) loadConfig(configurations types.Configurations, globalConfigura
 		for _, frontendName := range frontendNames {
 			frontendPostConfigs, err := s.loadFrontendConfig(providerName, frontendName, config,
 				serverEntryPoints,
-				backendsHandlers, backendsHealthCheck)
+				backendsHandlers, backendsHealthCheck, globalConfiguration.BreadCrumbs)
 			if err != nil {
 				log.Errorf("%v. Skipping frontend %s...", err, frontendName)
 			}
@@ -126,6 +126,7 @@ func (s *Server) loadFrontendConfig(
 	providerName string, frontendName string, config *types.Configuration,
 	serverEntryPoints map[string]*serverEntryPoint,
 	backendsHandlers map[string]http.Handler, backendsHealthCheck map[string]*healthcheck.BackendConfig,
+	breadCrumbsConfig *types.BreadCrumbsConfig,
 ) ([]handlerPostConfig, error) {
 
 	frontend := config.Frontends[frontendName]
@@ -164,7 +165,7 @@ func (s *Server) loadFrontendConfig(
 				postConfigs = append(postConfigs, postConfig)
 			}
 
-			fwd, err := s.buildForwarder(entryPointName, entryPoint, frontendName, frontend, responseModifier, backend)
+			fwd, err := s.buildForwarder(entryPointName, entryPoint, frontendName, frontend, responseModifier, backend, breadCrumbsConfig)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create the forwarder for frontend %s: %v", frontendName, err)
 			}
@@ -217,9 +218,9 @@ func (s *Server) loadFrontendConfig(
 
 func (s *Server) buildForwarder(entryPointName string, entryPoint *configuration.EntryPoint,
 	frontendName string, frontend *types.Frontend,
-	responseModifier modifyResponse, backend *types.Backend) (http.Handler, error) {
+	responseModifier modifyResponse, backend *types.Backend, breadCrumbsConfig *types.BreadCrumbsConfig) (http.Handler, error) {
 
-	roundTripper, err := s.getRoundTripper(entryPointName, frontend.PassTLSCert, entryPoint.TLS)
+	roundTripper, err := s.getRoundTripper(entryPointName, frontend.PassTLSCert, entryPoint.TLS, breadCrumbsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create RoundTripper for frontend %s: %v", frontendName, err)
 	}

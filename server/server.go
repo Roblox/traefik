@@ -218,7 +218,7 @@ func NewServer(globalConfiguration configuration.GlobalConfiguration, provider p
 		log.Errorf("failed to create HTTP transport: %v", err)
 	}
 
-	server.defaultForwardingRoundTripper, err = newSmartRoundTripper(transport)
+	server.defaultForwardingRoundTripper, err = newSmartRoundTripper(transport, globalConfiguration.BreadCrumbs)
 	if err != nil {
 		log.Errorf("Failed to create HTTP transport: %v", err)
 	}
